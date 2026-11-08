@@ -1,4 +1,4 @@
-import { Bot, Check, ShieldAlert, ShieldX, Sparkles } from "lucide-react";
+import { Bot, Check, Loader2, ShieldAlert, ShieldX, Sparkles } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { AgentStatus, ProposeResponse, submitPrompt } from "../lib/api";
 import { shorten } from "../lib/chain";
@@ -91,6 +91,18 @@ export function AgentConsole({ state, agent }: { state: VaultState; agent: Agent
         </div>
       </form>
 
+      {busy && (
+        <p
+          className="rise mt-4 flex items-start gap-2.5 rounded-lg border border-sys/25 bg-sys-dim/40 px-3.5 py-3 text-sm leading-relaxed text-muted"
+          role="status"
+        >
+          <Loader2 size={15} className="mt-0.5 shrink-0 animate-spin text-sys" aria-hidden />
+          <span>
+            <span className="font-medium text-fg">Gemini is reading your request.</span> If it describes a valid
+            payment, the agent submits it to Solana, where the program checks your policy. No funds move at this step.
+          </span>
+        </p>
+      )}
       {!agent && (
         <Notice tone="warn" title="Agent backend offline">
           Start it with <code className="font-mono text-xs">npm run dev</code> in the backend folder.

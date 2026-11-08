@@ -103,7 +103,7 @@ export function ProposalReview({ state }: { state: VaultState }) {
 
   if (!isPending || !proposal || !vault) {
     return (
-      <Panel title="Authorization requests" eyebrow="Owner approval">
+      <Panel key="empty" title="Authorization requests" eyebrow="Owner approval">
         <div className="flex items-start gap-4">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-line-strong bg-raised text-faint">
             <Inbox size={18} aria-hidden />
@@ -129,6 +129,7 @@ export function ProposalReview({ state }: { state: VaultState }) {
 
   return (
     <Panel
+      key={`pending-${nonce}`}
       title="Authorization request"
       eyebrow={`Proposal #${nonce} · from the agent`}
       aside={

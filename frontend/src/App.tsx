@@ -90,8 +90,15 @@ export default function App() {
             <main className="mt-5 grid items-start gap-5 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_340px]">
               <VaultCard state={state} />
               <div className="space-y-5">
-                <AgentConsole state={state} agent={agent} />
-                <ProposalReview state={state} />
+                {/* While a proposal waits, the approval step comes first: the console is disabled
+                    until it's resolved, and this keeps the decision above the fold. */}
+                {(pending ? ["review", "console"] : ["console", "review"]).map((panel) =>
+                  panel === "review" ? (
+                    <ProposalReview key="review" state={state} />
+                  ) : (
+                    <AgentConsole key="console" state={state} agent={agent} />
+                  )
+                )}
               </div>
               <div className="lg:col-span-2 xl:col-span-1">
                 <ActivityFeed
