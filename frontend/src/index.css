@@ -1,23 +1,33 @@
 @import "tailwindcss";
 
+/*
+ * IntentGuard design tokens: "autonomous money control room".
+ * Colour is semantic: lime = verified/authorized, cyan = system/network,
+ * amber = waiting for the owner, coral = blocked. Nothing else glows.
+ */
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-ink: #090c0f;
-  --color-panel: #10151a;
-  --color-raised: #161d23;
-  --color-line: #232c34;
-  --color-line-strong: #33404a;
-  --color-fg: #eaf0f3;
-  --color-muted: #94a3ae;
-  --color-faint: #66747f;
-  --color-guard: #35e0a1;
-  --color-guard-dim: #0f3a2b;
-  --color-warn: #f5b74f;
-  --color-warn-dim: #3d2d10;
-  --color-danger: #ff6b6b;
-  --color-danger-dim: #421b1e;
+  --color-ink: #07090b;
+  --color-panel: #0d1013;
+  --color-raised: #141820;
+  --color-line: #1d232a;
+  --color-line-strong: #2b333c;
+  --color-fg: #e9edf0;
+  --color-muted: #9aa4ad;
+  --color-faint: #7a858f;
+
+  --color-guard: #c5f24a;
+  --color-guard-dim: #1a220c;
+  --color-sys: #62d3e6;
+  --color-sys-dim: #0c2126;
+  --color-warn: #f2b84b;
+  --color-warn-dim: #2b2110;
+  --color-danger: #ff7262;
+  --color-danger-dim: #2c1512;
 }
 
 html,
@@ -26,12 +36,40 @@ body {
   color: var(--color-fg);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background-image: radial-gradient(900px 420px at 50% -120px, rgb(53 224 161 / 0.07), transparent);
-  background-repeat: no-repeat;
   min-height: 100vh;
+}
+
+::selection {
+  background: rgb(197 242 74 / 0.28);
+  color: var(--color-fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-guard);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* A fine engineering grid that fades out, used behind the hero and the console header. */
+.grid-field {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 25%, transparent 75%);
+}
+
+/* Small uppercase labels: section eyebrows, field labels, step numbers. */
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 @keyframes rise {
@@ -47,47 +85,233 @@ body {
 
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 rgb(245 183 79 / 0.35);
+    box-shadow: 0 0 0 0 rgb(242 184 75 / 0.4);
   }
   100% {
-    box-shadow: 0 0 0 10px rgb(245 183 79 / 0);
+    box-shadow: 0 0 0 9px rgb(242 184 75 / 0);
+  }
+}
+
+@keyframes live-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Hero pipeline: an approved payment waits for the owner, then travels the whole path... */
+@keyframes packet-approved {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  22% {
+    transform: translateX(144px);
+  }
+  30% {
+    transform: translateX(144px);
+  }
+  44% {
+    transform: translateX(288px);
+  }
+  62% {
+    transform: translateX(288px);
+  }
+  78% {
+    transform: translateX(432px);
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: translateX(432px);
+    opacity: 0;
+  }
+}
+
+/* ...while an over-limit one is turned away at the policy gate. */
+@keyframes packet-blocked {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  22% {
+    transform: translate(144px, 0);
+  }
+  30% {
+    transform: translate(144px, 0);
+  }
+  44% {
+    transform: translate(144px, 56px);
+    opacity: 1;
+  }
+  58%,
+  100% {
+    transform: translate(144px, 56px);
+    opacity: 0;
+  }
+}
+
+@keyframes owner-wait {
+  0%,
+  44%,
+  64%,
+  100% {
+    stroke: var(--color-line-strong);
+  }
+  48%,
+  60% {
+    stroke: var(--color-warn);
+  }
+}
+
+@keyframes gate-reject {
+  0%,
+  26%,
+  52%,
+  100% {
+    stroke: var(--color-line-strong);
+  }
+  30%,
+  46% {
+    stroke: var(--color-danger);
+  }
+}
+
+@keyframes chute-hit {
+  0%,
+  40%,
+  62%,
+  100% {
+    stroke: rgb(255 114 98 / 0.35);
+    fill: rgb(44 21 18 / 0.5);
+  }
+  44%,
+  56% {
+    stroke: var(--color-danger);
+    fill: rgb(44 21 18 / 1);
+  }
+}
+
+@keyframes dial-turn {
+  to {
+    transform: rotate(360deg);
   }
 }
 
 .rise {
-  animation: rise 0.28s ease-out both;
+  animation: rise 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .pulse-ring {
   animation: pulse-ring 1.8s ease-out infinite;
 }
 
+.live-dot {
+  animation: live-dot 2.4s ease-in-out infinite;
+}
+
+/* Both packets share one 8s cycle; the blocked one runs half a cycle later. */
+.packet-approved,
+.packet-blocked {
+  transform-box: fill-box;
+}
+
+.packet-approved {
+  animation: packet-approved 8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+.packet-blocked {
+  animation: packet-blocked 8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  animation-delay: 4s;
+}
+
+.owner-wait {
+  animation: owner-wait 8s linear infinite;
+}
+
+.gate-reject {
+  animation: gate-reject 8s linear infinite;
+  animation-delay: 4s;
+}
+
+.chute-hit {
+  animation: chute-hit 8s linear infinite;
+  animation-delay: 4s;
+}
+
+.dial-turn {
+  animation: dial-turn 48s linear infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rise,
-  .pulse-ring {
+  .pulse-ring,
+  .live-dot,
+  .dial-turn,
+  .owner-wait,
+  .gate-reject,
+  .chute-hit {
     animation: none;
+  }
+  .packet-approved,
+  .packet-blocked {
+    display: none;
   }
 }
 
-/* Wallet adapter button, restyled to match the dashboard. */
+/* Wallet adapter button, restyled to match the console. */
 .wallet-adapter-button.wallet-adapter-button-trigger {
   background: var(--color-raised);
   border: 1px solid var(--color-line-strong);
   border-radius: 8px;
   color: var(--color-fg);
-  font-family: var(--font-sans);
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
   font-weight: 500;
   height: 38px;
   padding: 0 14px;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
 .wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
   background: var(--color-line);
+  border-color: var(--color-faint);
 }
 
 .wallet-adapter-button-trigger .wallet-adapter-button-start-icon,
 .wallet-adapter-button-trigger .wallet-adapter-button-start-icon img {
   height: 18px;
   width: 18px;
+}
+
+/* The landing call to action uses the same wallet button, in the primary style. */
+.cta-wallet .wallet-adapter-button.wallet-adapter-button-trigger {
+  background: var(--color-guard);
+  border-color: var(--color-guard);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  height: 48px;
+  padding: 0 22px;
+}
+
+.cta-wallet .wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
+  background: #d4f86d;
+  border-color: #d4f86d;
+}
+
+.wallet-adapter-modal-wrapper {
+  font-family: var(--font-sans);
 }

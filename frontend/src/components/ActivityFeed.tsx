@@ -1,7 +1,7 @@
 import { BorshInstructionCoder } from "@anchor-lang/core";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { ConfirmedSignatureInfo, PublicKey } from "@solana/web3.js";
-import { CheckCircle2, ExternalLink, ShieldX } from "lucide-react";
+import { Check, ExternalLink, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import idl from "../idl/intentguard.json";
 import { explorerTx, programErrorByCode, PROGRAM_ID, shorten } from "../lib/chain";
@@ -101,27 +101,52 @@ export function ActivityFeed({ vault, refreshKey }: { vault: PublicKey; refreshK
   }, [connection, vault, coder, refreshKey]);
 
   return (
-    <Panel title="Devnet activity" aside={<span className="text-xs text-faint">Live from Solana</span>}>
+    <Panel
+      title="Devnet activity"
+      eyebrow="On-chain history"
+      aside={
+        <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap font-mono text-[11px] text-sys" title="Live from Solana Devnet">
+          <span className="live-dot h-1.5 w-1.5 rounded-full bg-sys" aria-hidden /> Live
+        </span>
+      }
+      bodyClassName="px-5 py-4"
+    >
       {failed && !rows && <p className="text-sm text-warn">Couldn't load activity from Devnet.</p>}
-      {!failed && !rows && <p className="text-sm text-muted">Loading…</p>}
+      {!failed && !rows && (
+        <div className="space-y-3" role="status" aria-label="Loading activity">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex animate-pulse gap-3">
+              <span className="h-5 w-5 rounded-full bg-raised" />
+              <span className="flex-1 space-y-1.5">
+                <span className="block h-3 w-2/3 rounded bg-raised" />
+                <span className="block h-2.5 w-1/2 rounded bg-raised/70" />
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
       {rows?.length === 0 && <p className="text-sm text-muted">No transactions yet.</p>}
       {rows && rows.length > 0 && (
-        <ul className="-my-1 divide-y divide-line">
+        <ul className="relative">
+          <span className="absolute bottom-4 left-[9.5px] top-4 w-px bg-line" aria-hidden />
           {rows.map((row) => (
             <li key={row.signature}>
               <a
                 href={explorerTx(row.signature)}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-start gap-2.5 py-2.5"
+                className="group relative -mx-2 flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-raised/60"
               >
-                {row.failed ? (
-                  <ShieldX size={16} className="mt-0.5 shrink-0 text-danger" />
-                ) : (
-                  <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-guard" />
-                )}
+                <span
+                  className={`relative z-10 mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${
+                    row.failed ? "border-danger/50 bg-danger-dim text-danger" : "border-guard/40 bg-guard-dim text-guard"
+                  }`}
+                  aria-hidden
+                >
+                  {row.failed ? <X size={11} strokeWidth={2.5} /> : <Check size={11} strokeWidth={2.5} />}
+                </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium group-hover:text-guard">
+                  <span className={`block truncate text-sm font-medium ${row.failed ? "" : ""} group-hover:text-guard`}>
                     {row.failed ? "Blocked on-chain" : (row.label ?? "Transaction")}
                   </span>
                   {row.failed && (
@@ -129,12 +154,13 @@ export function ActivityFeed({ vault, refreshKey }: { vault: PublicKey; refreshK
                       {row.errorName ?? "Transaction failed"}
                     </span>
                   )}
-                  <span className="block font-mono text-xs text-faint">
+                  <span className="mt-0.5 block font-mono text-[11px] text-faint">
                     {shorten(row.signature, 6)}
                     {row.time && ` · ${new Date(row.time * 1000).toLocaleTimeString()}`}
                   </span>
                 </span>
-                <ExternalLink size={13} className="mt-1 shrink-0 text-faint group-hover:text-guard" />
+                <ExternalLink size={13} className="mt-1 shrink-0 text-faint transition-colors group-hover:text-guard" aria-hidden />
+                <span className="sr-only">Open on Solana Explorer</span>
               </a>
             </li>
           ))}

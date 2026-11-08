@@ -1,6 +1,7 @@
 import { BN } from "@anchor-lang/core";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
+import { ArrowDown, Lock } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { explorerAddress, formatSol, solToLamports } from "../lib/chain";
 import { useSendTransaction } from "../lib/useSendTransaction";
@@ -64,24 +65,42 @@ export function VaultCard({ state }: { state: VaultState }) {
     }
   };
 
+  const owner = vault.owner.toBase58();
+  const isYou = publicKey?.toBase58() === owner;
+
   return (
     <div className="space-y-5">
-      <Panel>
-        <p className="text-xs font-medium text-muted">Spendable balance</p>
-        <p className="mt-1 text-4xl font-semibold tracking-tight tabular-nums">
-          {state.spendable === null ? "…" : formatSol(state.spendable)}
-          <span className="ml-1.5 text-lg font-medium text-muted">SOL</span>
-        </p>
-        <p className="mt-1 text-xs text-faint">
-          {state.balance !== null &&
-            state.spendable !== null &&
-            `Plus ${formatSol(state.balance - state.spendable)} SOL held back to keep the vault rent-exempt.`}
-        </p>
-        <div className="mt-3 text-muted">
-          <Address value={vaultAddress.toBase58()} href={explorerAddress(vaultAddress.toBase58())} size={6} />
+      <Panel bodyClassName="p-0">
+        <div className="border-b border-line px-5 pb-5 pt-4">
+          <p className="label-mono text-faint">Spendable balance</p>
+          <p className="mt-2 flex items-baseline gap-2 font-mono text-[44px] font-medium leading-none tracking-[-0.03em] tabular-nums">
+            {state.spendable === null ? (
+              <span className="inline-block h-9 w-32 animate-pulse rounded-md bg-raised" aria-label="Loading balance" />
+            ) : (
+              formatSol(state.spendable)
+            )}
+            <span className="font-sans text-base font-medium tracking-normal text-muted">SOL</span>
+          </p>
+          <p className="mt-2.5 text-xs leading-relaxed text-faint">
+            {state.balance !== null &&
+              state.spendable !== null &&
+              `Plus ${formatSol(state.balance - state.spendable)} SOL held back to keep the vault rent-exempt.`}
+          </p>
         </div>
 
-        <form onSubmit={submitDeposit} className="mt-4 flex items-end gap-2">
+        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2.5 border-b border-line px-5 py-4 text-sm">
+          <dt className="label-mono self-center text-faint">Vault</dt>
+          <dd className="justify-self-end text-muted">
+            <Address value={vaultAddress.toBase58()} href={explorerAddress(vaultAddress.toBase58())} size={5} />
+          </dd>
+          <dt className="label-mono self-center text-faint">Owner</dt>
+          <dd className="flex items-center justify-end gap-2 text-muted">
+            {isYou && <span className="rounded border border-guard/25 bg-guard-dim px-1.5 font-mono text-[10px] text-guard">YOU</span>}
+            <Address value={owner} href={explorerAddress(owner)} size={5} />
+          </dd>
+        </dl>
+
+        <form onSubmit={submitDeposit} className="flex items-end gap-2 px-5 py-4">
           <div className="flex-1">
             <Field
               label="Deposit SOL"
@@ -95,41 +114,31 @@ export function VaultCard({ state }: { state: VaultState }) {
             Deposit
           </Button>
         </form>
-        <TxNotice result={depositTx.result} />
+        {depositTx.result && (
+          <div className="px-5 pb-4">
+            <TxNotice result={depositTx.result} />
+          </div>
+        )}
       </Panel>
 
-      <Panel title="Spending policy" aside={<EnforcementTag where="on-chain" />}>
-        <dl className="space-y-3 text-sm">
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-muted">Max per payment</dt>
-            <dd className="font-mono text-[13px]">{formatSol(vault.maxAmountLamports)} SOL</dd>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-muted">Approved recipient</dt>
-            <dd>
-              <Address
-                value={vault.approvedRecipient.toBase58()}
-                href={explorerAddress(vault.approvedRecipient.toBase58())}
-              />
-            </dd>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-muted">Authorized agent</dt>
-            <dd>
-              <Address
-                value={vault.authorizedAgent.toBase58()}
-                href={explorerAddress(vault.authorizedAgent.toBase58())}
-              />
-            </dd>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <dt className="whitespace-nowrap text-muted">Payments require</dt>
-            <dd className="whitespace-nowrap text-[13px]">Your Phantom signature</dd>
-          </div>
-        </dl>
+      <Panel title="Spending policy" eyebrow="Permissions" aside={<EnforcementTag where="on-chain" />}>
+        <ol className="relative" aria-label="Who can do what with this vault">
+          <span className="absolute bottom-6 left-[11px] top-6 w-px bg-line-strong" aria-hidden />
+          <PolicyNode label="Authorized agent" note="Can propose. Can't move funds.">
+            <Address value={vault.authorizedAgent.toBase58()} href={explorerAddress(vault.authorizedAgent.toBase58())} />
+          </PolicyNode>
+          <PolicyEdge>proposes a payment</PolicyEdge>
+          <PolicyNode label="Vault limit" note="Per payment, checked on proposal and approval." accent>
+            <span className="font-mono text-[15px] font-medium text-guard">{formatSol(vault.maxAmountLamports)} SOL</span>
+          </PolicyNode>
+          <PolicyEdge gate>Payments require your Phantom signature</PolicyEdge>
+          <PolicyNode label="Approved recipient" note="The only address this vault can pay.">
+            <Address value={vault.approvedRecipient.toBase58()} href={explorerAddress(vault.approvedRecipient.toBase58())} />
+          </PolicyNode>
+        </ol>
 
         {editing ? (
-          <form onSubmit={submitPolicy} className="mt-4 space-y-3 border-t border-line pt-4">
+          <form onSubmit={submitPolicy} className="mt-5 space-y-3 border-t border-line pt-4">
             <p className="text-xs text-faint">Leave a field blank to keep its current value.</p>
             <Field label="New max per payment (SOL)" value={maxSol} inputMode="decimal" onChange={(e) => setMaxSol(e.target.value)} />
             <Field label="New approved recipient" value={recipient} onChange={(e) => setRecipient(e.target.value)} />
@@ -145,12 +154,61 @@ export function VaultCard({ state }: { state: VaultState }) {
             </div>
           </form>
         ) : (
-          <Button variant="secondary" className="mt-4 w-full" onClick={() => setEditing(true)}>
+          <Button variant="secondary" className="mt-5 w-full" onClick={() => setEditing(true)}>
             Edit policy
           </Button>
         )}
         <TxNotice result={policyTx.result} />
       </Panel>
     </div>
+  );
+}
+
+function PolicyNode({
+  label,
+  note,
+  accent,
+  children,
+}: {
+  label: string;
+  note: string;
+  accent?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="relative flex gap-3.5">
+      <span
+        className={`relative z-10 mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md border ${
+          accent ? "border-guard/50 bg-guard-dim" : "border-line-strong bg-raised"
+        }`}
+        aria-hidden
+      >
+        <span className={`h-1.5 w-1.5 rounded-sm ${accent ? "bg-guard" : "bg-muted"}`} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <span className="label-mono text-faint">{label}</span>
+          <span className="text-fg">{children}</span>
+        </div>
+        <p className="mt-1 text-xs leading-relaxed text-faint">{note}</p>
+      </div>
+    </li>
+  );
+}
+
+function PolicyEdge({ gate, children }: { gate?: boolean; children: React.ReactNode }) {
+  return (
+    <li className="relative flex items-center gap-3.5 py-3" aria-hidden={!gate}>
+      <span className="relative z-10 grid w-6 shrink-0 place-items-center">
+        {gate ? (
+          <span className="grid h-5 w-5 place-items-center rounded-full border border-warn/50 bg-warn-dim text-warn">
+            <Lock size={10} aria-hidden />
+          </span>
+        ) : (
+          <ArrowDown size={12} className="bg-panel text-faint" aria-hidden />
+        )}
+      </span>
+      <span className={`text-xs ${gate ? "font-medium text-warn" : "text-faint"}`}>{children}</span>
+    </li>
   );
 }

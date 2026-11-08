@@ -1,34 +1,18 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Bot, ChevronRight, Link2, Loader2, ShieldCheck, UserRoundCheck } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ActivityFeed } from "./components/ActivityFeed";
 import { AgentConsole } from "./components/AgentConsole";
+import { Wordmark } from "./components/Emblem";
+import { Landing } from "./components/Landing";
 import { ProposalReview } from "./components/ProposalReview";
 import { VaultCard } from "./components/VaultCard";
 import { VaultSetup } from "./components/VaultSetup";
-import { Address, Panel } from "./components/ui";
+import { Address, NetworkPill } from "./components/ui";
 import { AgentStatus, fetchAgentStatus } from "./lib/api";
-import { explorerAddress, PROGRAM_ID } from "./lib/chain";
+import { explorerAddress, PROGRAM_ID, shorten } from "./lib/chain";
 import { useVaultState } from "./lib/useVaultState";
-
-const PILLARS = [
-  {
-    icon: Bot,
-    title: "AI proposes",
-    text: "Gemini turns a plain-English request into a structured payment. It never holds a key.",
-  },
-  {
-    icon: UserRoundCheck,
-    title: "The owner decides",
-    text: "Nothing moves until you review the payment and sign it yourself in Phantom.",
-  },
-  {
-    icon: Link2,
-    title: "Solana enforces",
-    text: "The program checks the agent, recipient and limit on-chain, even if the backend is compromised.",
-  },
-];
 
 export default function App() {
   const { publicKey } = useWallet();
@@ -43,95 +27,143 @@ export default function App() {
   }, []);
 
   const programMismatch = agent && agent.programId !== PROGRAM_ID.toBase58();
+  const pending = Boolean(state.proposal && "pending" in state.proposal.status);
 
   return (
-    <div className="mx-auto max-w-[1320px] px-4 pb-16 sm:px-6">
-      <header className="flex h-[72px] items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-guard-dim text-guard">
-            <ShieldCheck size={18} />
-          </span>
-          <span className="text-[15px] font-semibold tracking-tight">IntentGuard</span>
-          <span className="ml-1 rounded-md border border-guard/30 px-1.5 py-0.5 text-[11px] font-medium text-guard">
-            Devnet
-          </span>
+    <div className="relative min-h-screen overflow-x-clip">
+      <div className="grid-field pointer-events-none absolute inset-x-0 top-0 -z-0 h-[640px]" aria-hidden />
+
+      <header className="sticky top-0 z-20 border-b border-line/80 bg-ink/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <a href="/" aria-label="IntentGuard home" className="rounded-md">
+              <Wordmark />
+            </a>
+            {publicKey && (
+              <span className="hidden items-center gap-3 md:flex">
+                <span className="h-5 w-px bg-line-strong" aria-hidden />
+                <span className="label-mono text-muted">Console</span>
+                {state.vaultAddress && state.vault && (
+                  <span className="font-mono text-xs text-faint">vault {shorten(state.vaultAddress.toBase58(), 4)}</span>
+                )}
+              </span>
+            )}
+          </div>
+          <nav className="flex items-center gap-2 sm:gap-4" aria-label="Main">
+            {!publicKey && (
+              <span className="hidden items-center gap-6 pr-2 text-sm text-muted lg:flex">
+                <a href="#how" className="transition-colors hover:text-fg">How it works</a>
+                <a href="#enforcement" className="transition-colors hover:text-fg">Enforcement</a>
+              </span>
+            )}
+            <span className="hidden sm:inline-flex">
+              <NetworkPill />
+            </span>
+            <WalletMultiButton />
+          </nav>
         </div>
-        <WalletMultiButton />
       </header>
 
-      <div className="mb-5 space-y-2 empty:hidden">
-        {state.programDeployed === false && (
-          <Banner>The IntentGuard program isn't deployed to Devnet yet, so vaults can't be created.</Banner>
-        )}
-        {state.rpcError && <Banner>Can't reach Solana Devnet right now. Showing the last data received.</Banner>}
-        {programMismatch && <Banner>The backend and dashboard are using different program IDs.</Banner>}
-      </div>
-
-      {!publicKey ? (
-        <Landing />
-      ) : state.loading && !state.vault ? (
-        <div className="flex items-center justify-center gap-2 py-24 text-sm text-muted">
-          <Loader2 size={16} className="animate-spin" /> Reading your vault from Devnet…
+      <div className="relative mx-auto max-w-[1440px] px-5 pb-16 sm:px-8">
+        <div className="space-y-2 pt-5 empty:hidden">
+          {state.programDeployed === false && (
+            <Banner>The IntentGuard program isn't deployed to Devnet yet, so vaults can't be created.</Banner>
+          )}
+          {state.rpcError && <Banner>Can't reach Solana Devnet right now. Showing the last data received.</Banner>}
+          {programMismatch && <Banner>The backend and dashboard are using different program IDs.</Banner>}
         </div>
-      ) : !state.vault ? (
-        <VaultSetup state={state} agent={agent} />
-      ) : (
-        <>
-        <FlowStrip pending={Boolean(state.proposal && "pending" in state.proposal.status)} />
-        <main className="grid items-start gap-5 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_320px]">
-          <VaultCard state={state} />
-          <div className="space-y-5">
-            <AgentConsole state={state} agent={agent} />
-            <ProposalReview state={state} />
-          </div>
-          <div className="lg:col-span-2 xl:col-span-1">
-            <ActivityFeed
-              vault={state.vaultAddress!}
-              refreshKey={`${state.balance}-${state.proposal?.nonce.toString()}-${Object.keys(state.proposal?.status ?? {})[0]}`}
-            />
-          </div>
-        </main>
-        </>
-      )}
 
-      <footer className="mt-12 flex flex-wrap items-center gap-x-2 text-xs text-faint">
-        <span>Program</span>
-        <Address value={PROGRAM_ID.toBase58()} href={explorerAddress(PROGRAM_ID.toBase58())} />
-        <span>· Devnet only. These tokens have no real value.</span>
-      </footer>
+        {!publicKey ? (
+          <Landing />
+        ) : state.loading && !state.vault ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-32 text-sm text-muted" role="status">
+            <Loader2 size={20} className="animate-spin text-guard" aria-hidden />
+            Reading your vault from Solana Devnet…
+          </div>
+        ) : !state.vault ? (
+          <div className="py-10">
+            <VaultSetup state={state} agent={agent} />
+          </div>
+        ) : (
+          <div className="pt-6">
+            <FlowStrip pending={pending} />
+            <main className="mt-5 grid items-start gap-5 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_340px]">
+              <VaultCard state={state} />
+              <div className="space-y-5">
+                <AgentConsole state={state} agent={agent} />
+                <ProposalReview state={state} />
+              </div>
+              <div className="lg:col-span-2 xl:col-span-1">
+                <ActivityFeed
+                  vault={state.vaultAddress!}
+                  refreshKey={`${state.balance}-${state.proposal?.nonce.toString()}-${Object.keys(state.proposal?.status ?? {})[0]}`}
+                />
+              </div>
+            </main>
+          </div>
+        )}
+
+        <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-xs text-faint">
+          {publicKey ? (
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="label-mono">Program</span>
+              <span className="text-muted">
+                <Address value={PROGRAM_ID.toBase58()} href={explorerAddress(PROGRAM_ID.toBase58())} />
+              </span>
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <span className="font-display text-sm font-semibold text-muted">IntentGuard</span>
+              <span>Human control for autonomous money.</span>
+            </span>
+          )}
+          <span>Solana Devnet only. These tokens have no real value.</span>
+        </footer>
+      </div>
     </div>
   );
 }
 
-/** Where the current payment stands in the AI proposes / owner decides / Solana enforces flow. */
+/** Where the current payment stands: the agent proposes, the owner decides, Solana enforces. */
 function FlowStrip({ pending }: { pending: boolean }) {
   const steps = [
-    { icon: Bot, title: "Agent proposes", text: "Gemini parses, the agent submits", active: !pending },
-    { icon: UserRoundCheck, title: "You decide", text: pending ? "A payment is waiting for you" : "Nothing waiting", active: pending },
-    { icon: Link2, title: "Solana enforces", text: "Policy checked on-chain every time", active: true },
-  ];
+    { n: "01", title: "Agent proposes", text: "Gemini parses, the agent submits", tone: pending ? "idle" : "on" },
+    {
+      n: "02",
+      title: "You decide",
+      text: pending ? "A payment is waiting for you" : "Nothing waiting",
+      tone: pending ? "wait" : "idle",
+    },
+    { n: "03", title: "Solana enforces", text: "Policy checked on-chain every time", tone: "on" },
+  ] as const;
   return (
-    <ol className="rise mb-5 grid gap-2 rounded-xl border border-line bg-panel p-2 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-center">
-      {steps.map(({ icon: Icon, title, text, active }, i) => (
-        <li key={title} className="contents">
-          {i > 0 && <ChevronRight size={16} className="mx-auto hidden text-faint sm:block" aria-hidden />}
-          <div
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 ${
-              pending && i === 1 ? "bg-warn-dim/50 ring-1 ring-warn/30" : ""
+    <ol className="rise grid overflow-hidden rounded-xl border border-line bg-panel sm:grid-cols-3" aria-label="Payment flow">
+      {steps.map((step, i) => (
+        <li
+          key={step.n}
+          aria-current={step.tone === "wait" ? "step" : undefined}
+          className={`relative flex items-center gap-4 px-5 py-4 ${i > 0 ? "border-t border-line sm:border-l sm:border-t-0" : ""} ${
+            step.tone === "wait" ? "bg-warn-dim/45" : ""
+          }`}
+        >
+          <span
+            className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border font-mono text-xs font-medium ${
+              step.tone === "wait"
+                ? "pulse-ring border-warn/50 bg-warn-dim text-warn"
+                : step.tone === "on"
+                  ? "border-guard/30 bg-guard-dim text-guard"
+                  : "border-line-strong bg-raised text-faint"
             }`}
           >
-            <span
-              className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
-                pending && i === 1 ? "pulse-ring bg-warn-dim text-warn" : active ? "bg-guard-dim text-guard" : "bg-raised text-faint"
-              }`}
-            >
-              <Icon size={16} />
+            {step.n}
+          </span>
+          <span className="min-w-0">
+            <span className={`block text-sm font-semibold tracking-tight ${step.tone === "wait" ? "text-warn" : ""}`}>
+              {step.title}
             </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold tracking-tight">{title}</span>
-              <span className="block truncate text-xs text-muted">{text}</span>
-            </span>
-          </div>
+            <span className="block truncate text-xs text-muted">{step.text}</span>
+          </span>
+          {step.tone === "wait" && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-warn" aria-hidden />}
         </li>
       ))}
     </ol>
@@ -140,34 +172,8 @@ function FlowStrip({ pending }: { pending: boolean }) {
 
 function Banner({ children }: { children: React.ReactNode }) {
   return (
-    <p role="alert" className="rise rounded-lg border border-warn/30 bg-warn-dim/40 px-4 py-2.5 text-sm text-warn">
+    <p role="alert" className="rise rounded-lg border border-warn/30 bg-warn-dim/50 px-4 py-2.5 text-sm text-warn">
       {children}
     </p>
-  );
-}
-
-function Landing() {
-  return (
-    <main className="mx-auto max-w-4xl pt-16 text-center">
-      <h1 className="text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-        Human control for autonomous money.
-      </h1>
-      <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted text-balance">
-        Let an AI agent prepare payments without ever giving it access to your funds.
-      </p>
-      <div className="mt-8 flex justify-center">
-        <WalletMultiButton>Connect Phantom</WalletMultiButton>
-      </div>
-      <p className="mt-3 text-xs text-faint">Set Phantom to Devnet first, in its developer settings.</p>
-      <div className="mt-14 grid gap-4 text-left sm:grid-cols-3">
-        {PILLARS.map(({ icon: Icon, title, text }) => (
-          <Panel key={title}>
-            <Icon size={20} className="text-guard" />
-            <h2 className="mt-3 font-semibold tracking-tight">{title}</h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted">{text}</p>
-          </Panel>
-        ))}
-      </div>
-    </main>
   );
 }
