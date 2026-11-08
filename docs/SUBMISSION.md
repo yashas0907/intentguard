@@ -87,12 +87,42 @@ Record this only after the flow works live. Everything shown must be real Devnet
 
 ---
 
-## 5. Submission Checklist
+## 5. Verified Evidence for the Submission
 
-- [ ] GitHub repository is public and contains clean commit history.
-- [ ] No secrets (`.env`, `*keypair*.json`) are present in Git history.
-- [ ] Working Solana Devnet Program ID is documented and verified.
-- [ ] 2-minute video uploaded to YouTube or Loom (set to Unlisted or Public).
-- [ ] Devpost submission text filled with overview, media, and links.
-- [ ] Direct links to verified Solana Explorer transactions included in submission.
+- **Repository:** https://github.com/yashas0907/intentguard
+- **Program (Devnet):** https://explorer.solana.com/address/HUcVUeiiuJhTmzDzJDEgJ7tkejGmmKFTapaXvLVvkjcE?cluster=devnet
+- **Proof B1-B11:** the table in the README and `docs/devnet-proof.json`
+- **Real AI to on-chain rejection:** https://explorer.solana.com/tx/35u96Vk5SbPkKt3A3wSSVxJfXUXEUAsDPMngs37mtj2Uhwek8Csgo7ry15vP3mVXFjm6SuW9HL4GXyyDs8nGKyso?cluster=devnet
+- **Owner payment through Phantom:** https://explorer.solana.com/tx/3MG4XChsKktHLVmyUvGZviFEP2gSNujjiMnWcckCezCNZ3meuzp3sQvW7vwNJ34BbxdZ6KXfrLYnHNdXSzATV9oM?cluster=devnet
+- **Owner flow's over-limit request blocked on-chain:** https://explorer.solana.com/tx/3mhXjRkGqMtxiE6WjusbRazeUkq465WWGAkiCrMAMqcLApWxM4NH4RcsKgY6Aah7o6fRLiKjLiBmvKQ6JAL8qEGw?cluster=devnet
 
+## 6. Recording Steps (2 minutes)
+
+**Before recording**
+1. Start the backend: `cd backend && npm run dev`. Wait for "IntentGuard agent on http://127.0.0.1:8787".
+2. Start the dashboard: `cd frontend && npm run dev`.
+3. In Phantom, confirm the network is Devnet and the account has at least 0.1 SOL.
+4. Open http://localhost:5173, connect Phantom and confirm the vault loads with no pending proposal. Reject any leftover proposal first.
+5. Close other tabs and notifications. Use a 1920x1080 window. Use a phone hotspot if the venue Wi-Fi is unreliable.
+6. Each take uses about 2 Gemini requests. The free tier allows 20 per model per day, so rehearse sparingly.
+
+**During recording:** follow the script in section 4.
+1. Show the landing page and tagline, then the connected dashboard and the "Enforced on-chain" policy card.
+2. Click the valid example (`Pay 0.01 SOL to server host for compute credits`) and press **Send to agent**. Wait for "Proposal recorded" and the review card.
+3. Point at the original request, the matching intent hash, the policy checks and the simulation.
+4. Click **Approve & execute**. Show the Phantom popup (Devnet, the program, the balance change) and approve.
+5. Click **View on Solana Explorer** on the confirmation and show the transfer.
+6. Click the over-limit example and send it. Show the red "Blocked by the Solana program" card and open the failed transaction on Explorer.
+
+**After recording:** upload to YouTube (unlisted) or Loom. Watch it once to confirm every link and signature on screen is real.
+
+## 7. MLH Submission Checklist
+
+- [x] Public GitHub repository with README, setup, security model and limitations
+- [x] No secrets in Git (`.env`, keypairs and API keys excluded and scanned)
+- [x] Program deployed and verified on Devnet, with the Program ID in the README
+- [x] Real Devnet transactions linked, including blocked ones
+- [x] Owner payment through Phantom completed and linked in the README
+- [ ] Demo video (2 minutes or less) uploaded and linked
+- [ ] Devpost: title, tagline, description (section 1), tracks (Overall, AI), repo link, video link, Program ID
+- [ ] Submit before the deadline, then confirm the submission page shows the video and links

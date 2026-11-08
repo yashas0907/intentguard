@@ -22,6 +22,11 @@ void warmUpGemini();
 // Transient by design: the prompt and AI output behind each proposal, for the review
 // screen. The binding record is the intent hash stored on-chain.
 const intents = new Map<string, object>();
+const MAX_INTENTS = 200;
+const remember = (key: string, value: object) => {
+  intents.set(key, value);
+  if (intents.size > MAX_INTENTS) intents.delete(intents.keys().next().value!);
+};
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN ?? "http://localhost:5173" }));
@@ -70,9 +75,16 @@ app.post("/api/agent/parse-and-propose", limiter, async (req, res) => {
 
   try {
     const vault = await chain.fetchVault(vaultKey);
-    if (!vault) return offChain(404, "VAULT_NOT_FOUND", "That vault doesn't exist on Devnet.");
+    if (!vault) return offChain(404, "VAULT_NOT_FOUND", "No IntentGuard vault exists at that address on Devnet.");
     if (!vault.authorizedAgent.equals(chain.agent.publicKey)) {
       return offChain(403, "AGENT_NOT_AUTHORIZED", "This backend's agent isn't authorized on that vault.");
+    }
+
+    // Advisory only: the program also refuses a second pending proposal, but checking
+    // first avoids spending an agent fee and AI quota on a request that can't succeed.
+    const existing = await chain.fetchProposal(vaultKey);
+    if (existing && "pending" in existing.status) {
+      return offChain(409, "PROPOSAL_PENDING", "A proposal is already waiting for the owner. Approve or reject it first.");
     }
 
     const aiOutput = await parseWithGemini(prompt, {
@@ -110,9 +122,11 @@ app.post("/api/agent/parse-and-propose", limiter, async (req, res) => {
     }
 
     const proposalKey = chain.proposalAddress(vaultKey);
-    const proposal = await (chain.program.account as any).paymentProposal.fetch(proposalKey);
     const details = { prompt, parsedIntent, intentHash: intentHash.toString("hex"), model };
-    intents.set(`${vaultKey.toBase58()}:${proposal.nonce.toString()}`, details);
+    // The proposal is confirmed at this point. A failed read-back must not turn that
+    // into an error; it only means the review screen won't show the original prompt.
+    const proposal = await chain.fetchProposal(vaultKey).catch(() => null);
+    if (proposal) remember(`${vaultKey.toBase58()}:${proposal.nonce.toString()}`, details);
 
     return res.json({
       status: "PROPOSED",
@@ -134,6 +148,17 @@ app.post("/api/agent/parse-and-propose", limiter, async (req, res) => {
       message: "Couldn't reach Solana Devnet, or the agent has no SOL for fees.",
     });
   }
+});
+
+// Malformed JSON and other request errors get a JSON answer, not an HTML page.
+app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const status = (error as { status?: number }).status ?? 500;
+  res.status(status).json({
+    status: "INVALID_REQUEST",
+    enforcedBy: "off-chain",
+    code: status === 400 ? "MALFORMED_REQUEST" : "SERVER_ERROR",
+    message: status === 400 ? "The request body isn't valid JSON." : "Something went wrong on the agent backend.",
+  });
 });
 
 app.listen(port, "127.0.0.1", () => {

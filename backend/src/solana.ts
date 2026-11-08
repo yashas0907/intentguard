@@ -75,13 +75,36 @@ export class AgentChain {
     }
   }
 
-  fetchVault(vault: PublicKey) {
-    return (this.program.account as any).vault.fetchNullable(vault) as Promise<{
-      owner: PublicKey;
-      authorizedAgent: PublicKey;
-      approvedRecipient: PublicKey;
-      maxAmountLamports: BN;
-    } | null>;
+  /** Returns null when the address is empty or is not an IntentGuard vault. */
+  async fetchVault(vault: PublicKey) {
+    const info = await this.connection.getAccountInfo(vault, "confirmed");
+    if (!info || !info.owner.equals(this.program.programId)) return null;
+    try {
+      return (this.program.coder.accounts as any).decode("vault", info.data) as {
+        owner: PublicKey;
+        authorizedAgent: PublicKey;
+        approvedRecipient: PublicKey;
+        maxAmountLamports: BN;
+      };
+    } catch {
+      return null; // A program-owned account of another type, such as a proposal.
+    }
+  }
+
+  /** The current proposal, or null. Reads are retried; a persistent failure throws. */
+  async fetchProposal(vault: PublicKey) {
+    const address = this.proposalAddress(vault);
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return ((await (this.program.account as any).paymentProposal.fetchNullable(address, "confirmed")) ?? null) as {
+          status: Record<string, unknown>;
+          nonce: BN;
+        } | null;
+      } catch (error) {
+        if (attempt >= 4) throw error;
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+      }
+    }
   }
 
   proposalAddress(vault: PublicKey) {

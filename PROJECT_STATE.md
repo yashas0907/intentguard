@@ -1,7 +1,7 @@
 # PROJECT_STATE.md — IntentGuard Verified State
 
 **Last Updated:** November 7, 2026
-**Status:** Program deployed and verified on Devnet. Proof B1-B7 complete on Devnet; B8-B11 pending owner approval.
+**Status:** Deployed and verified on Devnet. Proof B1-B11 and the real Phantom owner flow are complete. Remaining: demo video and Devpost submission.
 
 Only verified facts belong here. No signature or result in this file is fabricated.
 
@@ -21,8 +21,8 @@ Only verified facts belong here. No signature or result in this file is fabricat
 
 | Item | Value | Status |
 | :--- | :--- | :--- |
-| Deployer (public) | `4rmC4HUKu3fcLdbYLAGwTyRnjwCgncVnv8yu2yz26h8F` | 0.75792312 SOL. Cumulative net spend 1.24207688 SOL of the approved 1.30 |
-| Agent (public) | `9HCi3TLstMPCFMthxD1EBeaXqf1ALZQg24jrSyih2Dzy` | 0.01999 SOL |
+| Deployer (public) | `4rmC4HUKu3fcLdbYLAGwTyRnjwCgncVnv8yu2yz26h8F` | 0.76791312 SOL, including 0.01 SOL received as the owner vault's approved recipient. Deployment and proof spend: 1.24208688 SOL of the approved 1.30 |
+| Agent (public) | `9HCi3TLstMPCFMthxD1EBeaXqf1ALZQg24jrSyih2Dzy` | 0.0170186 SOL |
 | Program ID | `HUcVUeiiuJhTmzDzJDEgJ7tkejGmmKFTapaXvLVvkjcE` | Deployed to Devnet, executable, on-chain bytes match SHA-256 `ba3170f3...a312`. Deploy tx `5cmrscNwBJt1bYuEUmLj1QVEds15nZyX6pcHx4FRPvg14xz4BSsuvkvrkzRGVHTsydERuf3feMkPcCiBmbUaJZLU` |
 
 ## 3. Milestones
@@ -30,17 +30,16 @@ Only verified facts belong here. No signature or result in this file is fabricat
 - [x] **M1 Smart contract:** `anchor build` succeeds.
 - [x] **M2 Contract tests:** 32 of 32 pass on a local validator (`anchor test --validator legacy`).
 - [x] **M3 Devnet deployment:** Deployed and independently verified (program exists, executable, upgrade authority is the deployer, on-chain bytes identical to the approved binary). The first CLI upload stalled on public RPC rate limits; the existing buffer was completed with a throttled writer and deployed with the official CLI.
-- [~] **M3 Devnet proof:** B1-B7 passed on Devnet (B5 `AmountExceedsPolicyLimit`, B6 `UnapprovedRecipient`, B7 `UnauthorizedAgent`). The run then stopped on a client-side error-handling bug, now fixed. B8-B11 await approval via `backend/scripts/devnet-proof-continue.ts`.
-- [~] **M4 Backend and AI:** Real Gemini verified: 7 of 7 live cases passed on `gemini-3.5-flash` through `backend/scripts/gemini-check.ts`. 9 of 9 validation tests pass. The live route from Gemini to a Devnet proposal is untested until M3.
-- [~] **M5 Frontend:** Typecheck and build pass. The UI flow passed in a headless browser against a local validator, using a test-only wallet and fixed intents. **Real Phantom on Devnet is untested.**
-- [ ] **M6 End-to-end:** Needs M3 and real Phantom.
-- [ ] **M7 QA and submission:** Docs and 2-minute script prepared. Commit, public repo, video and Devpost remain.
+- [x] **M3 Devnet proof:** B1-B11 all match their expected on-chain results (re-verified from chain). The first run stopped after B7 on a client-side error-handling bug, since fixed; B8-B11 ran via `backend/scripts/devnet-proof-continue.ts`. Record: `docs/devnet-proof.json`.
+- [x] **M4 Backend and AI:** Live on Devnet: real Gemini parsed requests, the agent proposed, and a prompt-injected 5 SOL request was rejected on-chain (tx `35u96Vk5...8nGKyso`). Earlier notes: Real Gemini verified: 7 of 7 live cases passed on `gemini-3.5-flash` through `backend/scripts/gemini-check.ts`. 9 of 9 validation tests pass. The live route from Gemini to a Devnet proposal is untested until M3.
+- [x] **M5 Frontend:** Real Phantom owner flow on Devnet: create vault, deposit 0.5 SOL, Gemini proposal, owner approval (tx `3MG4XChs...SzATV9oM`), over-limit request blocked (tx `3mhXjRkG...JAL8qEGw`), refresh and reconnect. Earlier notes: Typecheck and build pass. The UI flow passed in a headless browser against a local validator, using a test-only wallet and fixed intents. **Real Phantom on Devnet is untested.**
+- [x] **M6 End-to-end:** Complete on Devnet with real Gemini and real Phantom (see README).
+- [~] **M7 QA and submission:** Code audit fixes applied and tested, README and screenshots final, repository pushed. Remaining: demo video and Devpost submission.
 
-## 4. Blockers (need the owner)
+## 4. Remaining (needs the owner)
 
-1. Consolidated approval for the airdrop, deployment, vault funding and proof transactions.
-2. Confirmation in the dashboard that `AysYADsexZg9kydavXDbccTspYXmFw6zhwKta8pxDREy` is the connected Phantom wallet.
-3. Approval before any Git commit, push or submission.
+1. Record the 2-minute demo video (steps in `docs/SUBMISSION.md`).
+2. Submit on Devpost with the repository, video and Program ID.
 
 ## 4a. Cost basis (calculated, not yet Devnet results)
 

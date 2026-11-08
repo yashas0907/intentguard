@@ -1,6 +1,6 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Bot, Link2, Loader2, ShieldCheck, UserRoundCheck } from "lucide-react";
+import { Bot, ChevronRight, Link2, Loader2, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ActivityFeed } from "./components/ActivityFeed";
 import { AgentConsole } from "./components/AgentConsole";
@@ -76,6 +76,8 @@ export default function App() {
       ) : !state.vault ? (
         <VaultSetup state={state} agent={agent} />
       ) : (
+        <>
+        <FlowStrip pending={Boolean(state.proposal && "pending" in state.proposal.status)} />
         <main className="grid items-start gap-5 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_320px]">
           <VaultCard state={state} />
           <div className="space-y-5">
@@ -83,9 +85,13 @@ export default function App() {
             <ProposalReview state={state} />
           </div>
           <div className="lg:col-span-2 xl:col-span-1">
-            <ActivityFeed vault={state.vaultAddress!} />
+            <ActivityFeed
+              vault={state.vaultAddress!}
+              refreshKey={`${state.balance}-${state.proposal?.nonce.toString()}-${Object.keys(state.proposal?.status ?? {})[0]}`}
+            />
           </div>
         </main>
+        </>
       )}
 
       <footer className="mt-12 flex flex-wrap items-center gap-x-2 text-xs text-faint">
@@ -94,6 +100,41 @@ export default function App() {
         <span>· Devnet only. These tokens have no real value.</span>
       </footer>
     </div>
+  );
+}
+
+/** Where the current payment stands in the AI proposes / owner decides / Solana enforces flow. */
+function FlowStrip({ pending }: { pending: boolean }) {
+  const steps = [
+    { icon: Bot, title: "Agent proposes", text: "Gemini parses, the agent submits", active: !pending },
+    { icon: UserRoundCheck, title: "You decide", text: pending ? "A payment is waiting for you" : "Nothing waiting", active: pending },
+    { icon: Link2, title: "Solana enforces", text: "Policy checked on-chain every time", active: true },
+  ];
+  return (
+    <ol className="rise mb-5 grid gap-2 rounded-xl border border-line bg-panel p-2 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-center">
+      {steps.map(({ icon: Icon, title, text, active }, i) => (
+        <li key={title} className="contents">
+          {i > 0 && <ChevronRight size={16} className="mx-auto hidden text-faint sm:block" aria-hidden />}
+          <div
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 ${
+              pending && i === 1 ? "bg-warn-dim/50 ring-1 ring-warn/30" : ""
+            }`}
+          >
+            <span
+              className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
+                pending && i === 1 ? "pulse-ring bg-warn-dim text-warn" : active ? "bg-guard-dim text-guard" : "bg-raised text-faint"
+              }`}
+            >
+              <Icon size={16} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold tracking-tight">{title}</span>
+              <span className="block truncate text-xs text-muted">{text}</span>
+            </span>
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }
 

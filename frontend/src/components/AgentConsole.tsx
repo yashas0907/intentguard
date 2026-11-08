@@ -69,7 +69,12 @@ export function AgentConsole({ state, agent }: { state: VaultState; agent: Agent
             <Bot size={14} className="shrink-0" />
             The agent can only propose. Funds stay put until you approve.
           </p>
-          <Button type="submit" disabled={!prompt.trim() || !agent || notConfigured} busy={busy} className="shrink-0">
+          <Button
+            type="submit"
+            disabled={!prompt.trim() || !agent || notConfigured || Boolean(pendingExists)}
+            busy={busy}
+            className="shrink-0"
+          >
             {busy ? "Working…" : "Send to agent"}
           </Button>
         </div>

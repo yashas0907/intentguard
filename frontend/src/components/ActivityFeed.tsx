@@ -27,7 +27,7 @@ type Row = { signature: string; failed: boolean; errorName?: string; time: numbe
 const FEED_SIZE = 12;
 
 /** Real Devnet history for this vault, including transactions the program rejected. */
-export function ActivityFeed({ vault }: { vault: PublicKey }) {
+export function ActivityFeed({ vault, refreshKey }: { vault: PublicKey; refreshKey: string }) {
   const { connection } = useConnection();
   const coder = useMemo(() => new BorshInstructionCoder(idl as never), []);
   const labels = useRef(new Map<string, string>());
@@ -96,7 +96,9 @@ export function ActivityFeed({ vault }: { vault: PublicKey }) {
       active = false;
       clearInterval(timer);
     };
-  }, [connection, vault, coder]);
+    // refreshKey changes whenever the vault's balance or proposal changes, so new
+    // transactions appear right away instead of on the next timer tick.
+  }, [connection, vault, coder, refreshKey]);
 
   return (
     <Panel title="Devnet activity" aside={<span className="text-xs text-faint">Live from Solana</span>}>
@@ -120,8 +122,13 @@ export function ActivityFeed({ vault }: { vault: PublicKey }) {
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium group-hover:text-guard">
-                    {row.failed ? (row.errorName ? `Blocked: ${row.errorName}` : "Failed transaction") : (row.label ?? "Transaction")}
+                    {row.failed ? "Blocked on-chain" : (row.label ?? "Transaction")}
                   </span>
+                  {row.failed && (
+                    <span className="block truncate font-mono text-xs text-danger">
+                      {row.errorName ?? "Transaction failed"}
+                    </span>
+                  )}
                   <span className="block font-mono text-xs text-faint">
                     {shorten(row.signature, 6)}
                     {row.time && ` · ${new Date(row.time * 1000).toLocaleTimeString()}`}
