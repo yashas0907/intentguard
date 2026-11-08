@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 /*
- * IntentGuard design tokens: "autonomous money control room".
- * Colour is semantic: lime = verified/authorized, cyan = system/network,
- * amber = waiting for the owner, coral = blocked. Nothing else glows.
+ * IntentGuard: security printing for autonomous money.
+ * Colour is semantic: lime = cleared or verified, cyan = system and network,
+ * amber = waiting for the owner, coral = refused. Nothing else glows.
+ * Instrument Serif is the voice of the payment instruction, Plex Sans is the
+ * interface, Plex Mono is reserved for machine data.
  */
 @theme {
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
@@ -54,22 +56,12 @@ body {
   border-radius: 6px;
 }
 
-/* A fine engineering grid that fades out, used behind the hero and the console header. */
-.grid-field {
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 25%, transparent 75%);
-}
-
-/* Small uppercase labels: section eyebrows, field labels, step numbers. */
-.label-mono {
-  font-family: var(--font-mono);
-  font-size: 11px;
+/* Small interface labels: sentence case, never shouted. */
+.label-sm {
+  font-family: var(--font-sans);
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 @keyframes rise {
@@ -102,108 +94,46 @@ body {
   }
 }
 
-/* Hero pipeline: an approved payment waits for the owner, then travels the whole path... */
-@keyframes packet-approved {
-  0% {
-    transform: translateX(0);
-    opacity: 0;
+/* The owner's signature is written, not faded in. Paths use pathLength="1". */
+@keyframes ink-draw {
+  from {
+    stroke-dashoffset: 1;
   }
-  5% {
-    opacity: 1;
-  }
-  22% {
-    transform: translateX(144px);
-  }
-  30% {
-    transform: translateX(144px);
-  }
-  44% {
-    transform: translateX(288px);
-  }
-  62% {
-    transform: translateX(288px);
-  }
-  78% {
-    transform: translateX(432px);
-    opacity: 1;
-  }
-  90%,
-  100% {
-    transform: translateX(432px);
-    opacity: 0;
-  }
-}
-
-/* ...while an over-limit one is turned away at the policy gate. */
-@keyframes packet-blocked {
-  0% {
-    transform: translate(0, 0);
-    opacity: 0;
-  }
-  5% {
-    opacity: 1;
-  }
-  22% {
-    transform: translate(144px, 0);
-  }
-  30% {
-    transform: translate(144px, 0);
-  }
-  44% {
-    transform: translate(144px, 56px);
-    opacity: 1;
-  }
-  58%,
-  100% {
-    transform: translate(144px, 56px);
-    opacity: 0;
-  }
-}
-
-@keyframes owner-wait {
-  0%,
-  44%,
-  64%,
-  100% {
-    stroke: var(--color-line-strong);
-  }
-  48%,
-  60% {
-    stroke: var(--color-warn);
-  }
-}
-
-@keyframes gate-reject {
-  0%,
-  26%,
-  52%,
-  100% {
-    stroke: var(--color-line-strong);
-  }
-  30%,
-  46% {
-    stroke: var(--color-danger);
-  }
-}
-
-@keyframes chute-hit {
-  0%,
-  40%,
-  62%,
-  100% {
-    stroke: rgb(255 114 98 / 0.35);
-    fill: rgb(44 21 18 / 0.5);
-  }
-  44%,
-  56% {
-    stroke: var(--color-danger);
-    fill: rgb(44 21 18 / 1);
-  }
-}
-
-@keyframes dial-turn {
   to {
-    transform: rotate(360deg);
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The program's clearing stamp lands once, firmly. */
+@keyframes stamp-land {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(-26deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(0.95) rotate(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-12deg);
+  }
+}
+
+@keyframes check-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -24;
   }
 }
 
@@ -219,54 +149,303 @@ body {
   animation: live-dot 2.4s ease-in-out infinite;
 }
 
-/* Both packets share one 8s cycle; the blocked one runs half a cycle later. */
-.packet-approved,
-.packet-blocked {
+.ink {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.ink-animate {
+  animation: ink-draw 1.25s cubic-bezier(0.6, 0.1, 0.3, 1) both;
+}
+
+.stamp {
+  transform: rotate(-12deg);
+}
+
+.stamp-animate {
+  animation: stamp-land 0.55s cubic-bezier(0.2, 0.8, 0.25, 1.15) both;
+}
+
+.check-animate {
+  animation: check-pop 0.35s cubic-bezier(0.2, 0.8, 0.25, 1.3) both;
+}
+
+.flow-dash {
+  stroke-dasharray: 4 8;
+  animation: flow-dash 0.9s linear infinite;
+}
+
+/*
+ * Schematic motion. Every movement stands for something the system does:
+ * a request travelling, a check passing, a gate opening or refusing.
+ */
+svg .check-animate,
+svg .halo,
+svg .orbit {
   transform-box: fill-box;
-}
-
-.packet-approved {
-  animation: packet-approved 8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-}
-
-.packet-blocked {
-  animation: packet-blocked 8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  animation-delay: 4s;
-}
-
-.owner-wait {
-  animation: owner-wait 8s linear infinite;
-}
-
-.gate-reject {
-  animation: gate-reject 8s linear infinite;
-  animation-delay: 4s;
-}
-
-.chute-hit {
-  animation: chute-hit 8s linear infinite;
-  animation-delay: 4s;
-}
-
-.dial-turn {
-  animation: dial-turn 48s linear infinite;
   transform-origin: center;
-  transform-box: fill-box;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes halo {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.82);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes travel {
+  from {
+    opacity: 0;
+    transform: translate(var(--fx, 0px), var(--fy, 0px));
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes descend {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  8%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--dy, 0px));
+  }
+}
+
+@keyframes door-a {
+  to {
+    transform: translateY(calc(-1 * var(--shift, 24px)));
+    fill: var(--color-guard);
+  }
+}
+
+@keyframes door-b {
+  to {
+    transform: translateY(var(--shift, 24px));
+    fill: var(--color-guard);
+  }
+}
+
+@keyframes door-refuse {
+  0% {
+    fill: var(--color-fg);
+    transform: translateX(0);
+  }
+  15% {
+    fill: var(--color-danger);
+  }
+  30% {
+    transform: translateX(-4px);
+  }
+  45% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+  100% {
+    fill: var(--color-danger);
+    transform: translateX(0);
+  }
+}
+
+@keyframes lane-pass {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  35%,
+  55% {
+    transform: translateX(var(--x1));
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--x2));
+    opacity: 0;
+  }
+}
+
+@keyframes lane-bounce {
+  0% {
+    transform: translateX(0);
+  }
+  60% {
+    transform: translateX(var(--x1));
+  }
+  75% {
+    transform: translateX(calc(var(--x1) - 20px));
+  }
+  100% {
+    transform: translateX(calc(var(--x1) - 12px));
+  }
+}
+
+.appear {
+  animation: appear 0.5s ease both;
+}
+
+.fade-out {
+  animation: fade-out 0.4s ease both;
+}
+
+.halo {
+  animation: halo 1.8s ease-out infinite;
+}
+
+.orbit {
+  animation: orbit 48s linear infinite;
+}
+
+.glow-pulse {
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+.shake {
+  animation: shake 0.45s ease both;
+}
+
+.travel {
+  animation: travel 0.8s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+
+.descend {
+  animation: descend 1.5s linear both;
+}
+
+.door-a {
+  animation: door-a 0.6s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+
+.door-b {
+  animation: door-b 0.6s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+
+.door-refuse {
+  animation: door-refuse 0.6s ease both;
+}
+
+.lane-pass {
+  animation: lane-pass 1.9s cubic-bezier(0.45, 0, 0.3, 1) both;
+}
+
+.lane-bounce {
+  animation: lane-bounce 1.2s cubic-bezier(0.45, 0, 0.3, 1) both;
+}
+
+/* Story scenes cross-fade in place while the stage stays pinned. */
+.scene-copy {
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.scene-copy[data-active="false"] {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.story-progress {
+  transform-origin: top;
+  transform: scaleY(var(--story-progress, 0));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .rise,
   .pulse-ring,
   .live-dot,
-  .dial-turn,
-  .owner-wait,
-  .gate-reject,
-  .chute-hit {
+  .ink-animate,
+  .stamp-animate,
+  .check-animate,
+  .flow-dash,
+  .appear,
+  .fade-out,
+  .halo,
+  .orbit,
+  .glow-pulse,
+  .shake,
+  .travel,
+  .descend,
+  .door-a,
+  .door-b,
+  .door-refuse,
+  .lane-pass,
+  .lane-bounce {
     animation: none;
   }
-  .packet-approved,
-  .packet-blocked {
-    display: none;
+  .scene-copy,
+  .circuit *,
+  .circuit-stage * {
+    transition: none !important;
   }
 }
 
@@ -281,7 +460,9 @@ body {
   font-weight: 500;
   height: 38px;
   padding: 0 14px;
-  transition: background-color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
 }
 
 .wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
@@ -295,7 +476,7 @@ body {
   width: 18px;
 }
 
-/* The landing call to action uses the same wallet button, in the primary style. */
+/* Calls to action use the same wallet button, in the primary style. */
 .cta-wallet .wallet-adapter-button.wallet-adapter-button-trigger {
   background: var(--color-guard);
   border-color: var(--color-guard);
@@ -314,4 +495,37 @@ body {
 
 .wallet-adapter-modal-wrapper {
   font-family: var(--font-sans);
+}
+
+/*
+ * Hero sizing. --hero-chrome is the height above and below the circuit diagram
+ * (header, headline, controls), so the diagram fits the first screen on laptops.
+ */
+.hero-title {
+  font-size: 52px;
+}
+
+:root {
+  --hero-chrome: 462px;
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 72px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero-title {
+    font-size: 84px;
+  }
+}
+
+@media (min-width: 1280px) and (max-height: 820px) {
+  .hero-title {
+    font-size: 66px;
+  }
+  :root {
+    --hero-chrome: 400px;
+  }
 }

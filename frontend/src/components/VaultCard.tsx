@@ -72,7 +72,7 @@ export function VaultCard({ state }: { state: VaultState }) {
     <div className="space-y-5">
       <Panel bodyClassName="p-0">
         <div className="border-b border-line px-5 pb-5 pt-4">
-          <p className="label-mono text-faint">Spendable balance</p>
+          <p className="label-sm text-faint">Spendable balance</p>
           <p className="mt-2 flex items-baseline gap-2 font-mono text-[44px] font-medium leading-none tracking-[-0.03em] tabular-nums">
             {state.spendable === null ? (
               <span className="inline-block h-9 w-32 animate-pulse rounded-md bg-raised" aria-label="Loading balance" />
@@ -89,11 +89,11 @@ export function VaultCard({ state }: { state: VaultState }) {
         </div>
 
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2.5 border-b border-line px-5 py-4 text-sm">
-          <dt className="label-mono self-center text-faint">Vault</dt>
+          <dt className="label-sm self-center text-faint">Vault</dt>
           <dd className="justify-self-end text-muted">
             <Address value={vaultAddress.toBase58()} href={explorerAddress(vaultAddress.toBase58())} size={5} />
           </dd>
-          <dt className="label-mono self-center text-faint">Owner</dt>
+          <dt className="label-sm self-center text-faint">Owner</dt>
           <dd className="flex items-center justify-end gap-2 text-muted">
             {isYou && <span className="rounded border border-guard/25 bg-guard-dim px-1.5 font-mono text-[10px] text-guard">YOU</span>}
             <Address value={owner} href={explorerAddress(owner)} size={5} />
@@ -121,7 +121,7 @@ export function VaultCard({ state }: { state: VaultState }) {
         )}
       </Panel>
 
-      <Panel title="Spending policy" eyebrow="Permissions" aside={<EnforcementTag where="on-chain" />}>
+      <Panel title="Spending policy" aside={<EnforcementTag where="on-chain" />}>
         <ol className="relative" aria-label="Who can do what with this vault">
           <span className="absolute bottom-6 left-[11px] top-6 w-px bg-line-strong" aria-hidden />
           <PolicyNode label="Authorized agent" note="Can propose. Can't move funds.">
@@ -187,7 +187,7 @@ function PolicyNode({
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <span className="label-mono text-faint">{label}</span>
+          <span className="label-sm text-faint">{label}</span>
           <span className="text-fg">{children}</span>
         </div>
         <p className="mt-1 text-xs leading-relaxed text-faint">{note}</p>

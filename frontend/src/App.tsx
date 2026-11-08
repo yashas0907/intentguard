@@ -31,7 +31,6 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
-      <div className="grid-field pointer-events-none absolute inset-x-0 top-0 -z-0 h-[640px]" aria-hidden />
 
       <header className="sticky top-0 z-20 border-b border-line/80 bg-ink/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8">
@@ -42,7 +41,7 @@ export default function App() {
             {publicKey && (
               <span className="hidden items-center gap-3 md:flex">
                 <span className="h-5 w-px bg-line-strong" aria-hidden />
-                <span className="label-mono text-muted">Console</span>
+                <span className="label-sm text-muted">Console</span>
                 {state.vaultAddress && state.vault && (
                   <span className="font-mono text-xs text-faint">vault {shorten(state.vaultAddress.toBase58(), 4)}</span>
                 )}
@@ -53,7 +52,8 @@ export default function App() {
             {!publicKey && (
               <span className="hidden items-center gap-6 pr-2 text-sm text-muted lg:flex">
                 <a href="#how" className="transition-colors hover:text-fg">How it works</a>
-                <a href="#enforcement" className="transition-colors hover:text-fg">Enforcement</a>
+                <a href="#evidence" className="transition-colors hover:text-fg">Evidence</a>
+                <a href="#rules" className="transition-colors hover:text-fg">Rules</a>
               </span>
             )}
             <span className="hidden sm:inline-flex">
@@ -86,7 +86,14 @@ export default function App() {
           </div>
         ) : (
           <div className="pt-6">
-            <FlowStrip pending={pending} />
+            <FlowStrip
+              pending={pending}
+              last={
+                state.proposal
+                  ? { status: Object.keys(state.proposal.status)[0], nonce: state.proposal.nonce.toString() }
+                  : null
+              }
+            />
             <main className="mt-5 grid items-start gap-5 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_340px]">
               <VaultCard state={state} />
               <div className="space-y-5">
@@ -113,14 +120,14 @@ export default function App() {
         <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-xs text-faint">
           {publicKey ? (
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="label-mono">Program</span>
+              <span className="label-sm">Program</span>
               <span className="text-muted">
                 <Address value={PROGRAM_ID.toBase58()} href={explorerAddress(PROGRAM_ID.toBase58())} />
               </span>
             </span>
           ) : (
             <span className="flex items-center gap-2">
-              <span className="font-display text-sm font-semibold text-muted">IntentGuard</span>
+              <span className="text-sm font-semibold text-muted">IntentGuard</span>
               <span>Human control for autonomous money.</span>
             </span>
           )}
@@ -132,16 +139,26 @@ export default function App() {
 }
 
 /** Where the current payment stands: the agent proposes, the owner decides, Solana enforces. */
-function FlowStrip({ pending }: { pending: boolean }) {
+function FlowStrip({ pending, last }: { pending: boolean; last: { status: string; nonce: string } | null }) {
+  // Read from the vault's proposal account on-chain: what happened to the latest proposal.
   const steps = [
-    { n: "01", title: "Agent proposes", text: "Gemini parses, the agent submits", tone: pending ? "idle" : "on" },
+    { n: "01", title: "Agent proposes", text: "Gemini drafts it, the agent submits it", tone: pending ? "idle" : "on" },
     {
       n: "02",
       title: "You decide",
-      text: pending ? "A payment is waiting for you" : "Nothing waiting",
+      text: pending
+        ? "A payment is waiting for you"
+        : last?.status === "rejected"
+          ? `You rejected proposal ${last.nonce}`
+          : "Nothing waiting",
       tone: pending ? "wait" : "idle",
     },
-    { n: "03", title: "Solana enforces", text: "Policy checked on-chain every time", tone: "on" },
+    {
+      n: "03",
+      title: "Solana enforces",
+      text: !pending && last?.status === "executed" ? `Proposal ${last.nonce} executed on-chain` : "Policy checked on-chain every time",
+      tone: "on",
+    },
   ] as const;
   return (
     <ol className="rise grid overflow-hidden rounded-xl border border-line bg-panel sm:grid-cols-3" aria-label="Payment flow">

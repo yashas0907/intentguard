@@ -1,7 +1,7 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { VersionedTransaction } from "@solana/web3.js";
 import { BN } from "@anchor-lang/core";
-import { ArrowRight, Check, CircleX, Inbox, Info, Lock, RefreshCw } from "lucide-react";
+import { ArrowRight, Check, CircleX, Info, Lock, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { fetchIntentDetails, IntentDetails } from "../lib/api";
 import { explorerAddress, formatSol, programErrorByCode } from "../lib/chain";
@@ -103,10 +103,15 @@ export function ProposalReview({ state }: { state: VaultState }) {
 
   if (!isPending || !proposal || !vault) {
     return (
-      <Panel key="empty" title="Authorization requests" eyebrow="Owner approval">
+      <Panel key="empty" title="Authorization requests">
         <div className="flex items-start gap-4">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-line-strong bg-raised text-faint">
-            <Inbox size={18} aria-hidden />
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-line-strong bg-raised">
+            {/* The owner gate from the landing schematic, closed. */}
+            <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden>
+              <path d="M2 12 H8 M16 12 H22" stroke="var(--color-faint)" strokeWidth={1.6} strokeLinecap="round" />
+              <rect x={9.5} y={3} width={5} height={8.4} rx={1.2} fill="var(--color-muted)" />
+              <rect x={9.5} y={12.6} width={5} height={8.4} rx={1.2} fill="var(--color-muted)" />
+            </svg>
           </span>
           <div>
             <p className="text-sm font-medium">Nothing is waiting for your approval.</p>
@@ -131,9 +136,9 @@ export function ProposalReview({ state }: { state: VaultState }) {
     <Panel
       key={`pending-${nonce}`}
       title="Authorization request"
-      eyebrow={`Proposal #${nonce} · from the agent`}
+      eyebrow={`Proposal ${nonce}, drafted by the agent`}
       aside={
-        <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-warn/40 bg-warn-dim px-2 py-1 font-mono text-[11px] font-medium text-warn">
+        <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-warn/40 bg-warn-dim px-2 py-1 text-[11px] font-medium text-warn">
           <span className="pulse-ring h-1.5 w-1.5 rounded-full bg-warn" aria-hidden /> Awaiting your signature
         </span>
       }
@@ -147,20 +152,20 @@ export function ProposalReview({ state }: { state: VaultState }) {
 
       <div className="grid gap-6 px-5 py-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div>
-          <p className="label-mono text-faint">Amount</p>
+          <p className="label-sm text-faint">Amount</p>
           <p className="mt-1.5 flex items-baseline gap-2 font-mono text-[44px] font-medium leading-none tracking-[-0.03em] tabular-nums">
             {formatSol(proposal.amount)}
             <span className="font-sans text-base font-medium tracking-normal text-muted">SOL</span>
           </p>
           <dl className="mt-5 overflow-hidden rounded-lg border border-line text-sm">
             <div className="flex items-center justify-between gap-3 bg-raised/40 px-3 py-2">
-              <dt className="label-mono text-faint">From vault</dt>
+              <dt className="label-sm text-faint">From vault</dt>
               <dd className="text-muted">
                 <Address value={vaultAddress!.toBase58()} href={explorerAddress(vaultAddress!.toBase58())} />
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3 border-t border-line px-3 py-2">
-              <dt className="label-mono flex items-center gap-1.5 text-faint">
+              <dt className="label-sm flex items-center gap-1.5 text-faint">
                 <ArrowRight size={12} aria-hidden /> To
               </dt>
               <dd className="text-fg">
@@ -171,7 +176,7 @@ export function ProposalReview({ state }: { state: VaultState }) {
         </div>
 
         <div className="rounded-lg border border-line bg-ink p-3.5 text-sm">
-          <p className="label-mono text-faint">Original request</p>
+          <p className="label-sm text-faint">Original request</p>
           {details ? (
             <>
               <p className="mt-1.5 break-words font-serif text-[19px] italic leading-snug">“{details.prompt}”</p>
@@ -180,7 +185,8 @@ export function ProposalReview({ state }: { state: VaultState }) {
                 <dd className="font-mono text-sys">{details.model}</dd>
                 <dt className="text-faint">Intent</dt>
                 <dd className="font-mono">
-                  {details.parsedIntent.amountSol} SOL{details.parsedIntent.memo && ` · ${details.parsedIntent.memo}`}
+                  {details.parsedIntent.amountSol} SOL
+                  {details.parsedIntent.memo && <span className="text-muted">, “{details.parsedIntent.memo}”</span>}
                 </dd>
                 <dt className="text-faint">Confidence</dt>
                 <dd className="font-mono">{Math.round(details.parsedIntent.confidence * 100)}%</dd>
@@ -200,7 +206,7 @@ export function ProposalReview({ state }: { state: VaultState }) {
       <div className="grid border-t border-line md:grid-cols-2">
         <div className="px-5 py-4">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="label-mono text-faint">Policy checks</p>
+            <p className="label-sm text-faint">Policy checks</p>
             <EnforcementTag where="on-chain" />
           </div>
           <ul className="space-y-2 text-sm">
@@ -208,14 +214,11 @@ export function ProposalReview({ state }: { state: VaultState }) {
             <CheckRow ok={recipientApproved} label="Recipient is the approved address" />
             <CheckRow ok={proposal.agent.equals(vault.authorizedAgent)} label="Proposed by the authorized agent" />
           </ul>
-          <p className="mt-3 text-xs leading-relaxed text-faint">
-            Shown here for review. The program checks these again when you approve.
-          </p>
         </div>
 
         <div className="border-t border-line px-5 py-4 text-sm md:border-l md:border-t-0">
           <div className="flex items-center justify-between gap-2">
-            <p className="label-mono text-faint">
+            <p className="label-sm text-faint">
               Simulation on Devnet
               <span className="mt-0.5 block normal-case tracking-normal text-faint/80">No funds move</span>
             </p>
@@ -242,11 +245,15 @@ export function ProposalReview({ state }: { state: VaultState }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line bg-raised/30 px-5 py-4 md:flex-nowrap">
-        <p className="flex min-w-0 basis-full items-start gap-2 text-xs leading-relaxed text-muted md:flex-1 md:basis-auto">
-          <Lock size={13} className="mt-0.5 shrink-0 text-faint" aria-hidden />
-          Approving opens Phantom. The program re-checks the policy before any SOL moves.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4 border-t border-line bg-raised/30 px-5 py-4 md:flex-nowrap">
+        {/* The same signature line as the landing page's payment instruction. */}
+        <div className="min-w-0 basis-full md:flex-1 md:basis-auto">
+          <p className="font-serif text-[19px] italic leading-none text-faint">Your signature</p>
+          <p className="mt-2 flex items-start gap-2 border-t border-dashed border-line-strong pt-2 text-xs leading-relaxed text-muted">
+            <Lock size={13} className="mt-0.5 shrink-0 text-faint" aria-hidden />
+            Approving opens Phantom. The program re-checks the policy before any SOL moves.
+          </p>
+        </div>
         <div className="flex w-full shrink-0 gap-2 md:w-auto">
           <Button
             variant="danger"

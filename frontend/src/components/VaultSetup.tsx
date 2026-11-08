@@ -56,8 +56,7 @@ export function VaultSetup({ state, agent }: { state: VaultState; agent: AgentSt
   return (
     <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:gap-12">
       <div className="rise lg:pt-6">
-        <p className="label-mono text-guard">Step 1 of 1</p>
-        <h1 className="mt-3 font-display text-[36px] font-semibold leading-[1.05] tracking-[-0.015em]">
+        <h1 className="font-serif text-[44px] leading-[1.02] tracking-[-0.01em]">
           Set the rules
           <br />
           <span className="font-serif text-[1.1em] font-normal italic text-muted">before the agent asks.</span>
@@ -83,9 +82,9 @@ export function VaultSetup({ state, agent }: { state: VaultState; agent: AgentSt
         <p className="mt-6 text-xs text-faint">Only your wallet can change these rules later.</p>
       </div>
 
-      <Panel title="Create your vault" eyebrow="New vault" aside={<EnforcementTag where="on-chain" />}>
+      <Panel title="Create your vault" aside={<EnforcementTag where="on-chain" />}>
         <div className="mb-5 rounded-lg border border-line bg-ink px-3 py-2.5">
-          <span className="label-mono text-faint">Connected wallet · owner</span>
+          <span className="label-sm text-faint">Owner: your connected wallet</span>
           <span className="mt-1 block break-all font-mono text-[13px] text-fg">{publicKey?.toBase58()}</span>
         </div>
         <form onSubmit={submit} className="space-y-4">

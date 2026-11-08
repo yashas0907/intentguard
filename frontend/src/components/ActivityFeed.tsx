@@ -103,9 +103,8 @@ export function ActivityFeed({ vault, refreshKey }: { vault: PublicKey; refreshK
   return (
     <Panel
       title="Devnet activity"
-      eyebrow="On-chain history"
       aside={
-        <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap font-mono text-[11px] text-sys" title="Live from Solana Devnet">
+        <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[11px] font-medium text-sys" title="Live from Solana Devnet">
           <span className="live-dot h-1.5 w-1.5 rounded-full bg-sys" aria-hidden /> Live
         </span>
       }
@@ -156,7 +155,7 @@ export function ActivityFeed({ vault, refreshKey }: { vault: PublicKey; refreshK
                   )}
                   <span className="mt-0.5 block font-mono text-[11px] text-faint">
                     {shorten(row.signature, 6)}
-                    {row.time && ` · ${new Date(row.time * 1000).toLocaleTimeString()}`}
+                    {row.time && <span className="ml-2">{new Date(row.time * 1000).toLocaleTimeString()}</span>}
                   </span>
                 </span>
                 <ExternalLink size={13} className="mt-1 shrink-0 text-faint transition-colors group-hover:text-guard" aria-hidden />

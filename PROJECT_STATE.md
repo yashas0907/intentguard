@@ -1,7 +1,7 @@
 # PROJECT_STATE.md — IntentGuard Verified State
 
-**Last Updated:** November 7, 2026
-**Status:** Deployed and verified on Devnet. Proof B1-B11 and the real Phantom owner flow are complete. Remaining: demo video and Devpost submission.
+**Last Updated:** November 8, 2026
+**Status:** Deployed and verified on Devnet. Proof B1-B11 and the real Phantom owner flow are complete. The frontend presentation redesign is committed on the local `experience` branch (not merged, not pushed). Remaining: demo video and Devpost submission.
 
 Only verified facts belong here. No signature or result in this file is fabricated.
 
@@ -35,6 +35,40 @@ Only verified facts belong here. No signature or result in this file is fabricat
 - [x] **M5 Frontend:** Real Phantom owner flow on Devnet: create vault, deposit 0.5 SOL, Gemini proposal, owner approval (tx `3MG4XChs...SzATV9oM`), over-limit request blocked (tx `3mhXjRkG...JAL8qEGw`), refresh and reconnect. Earlier notes: Typecheck and build pass. The UI flow passed in a headless browser against a local validator, using a test-only wallet and fixed intents. **Real Phantom on Devnet is untested.**
 - [x] **M6 End-to-end:** Complete on Devnet with real Gemini and real Phantom (see README).
 - [~] **M7 QA and submission:** Code audit fixes applied and tested, README and screenshots final, repository pushed. Remaining: demo video and Devpost submission.
+- [x] **Frontend presentation (`experience` branch):** Landing page and console redesign. Presentation only: see section 3a.
+
+## 3a. Frontend presentation redesign (`experience` branch, from `ee90a5e`)
+
+Committed locally on `experience`. Not merged into `main`, not pushed. `main`, `origin/main` and `visual-polish` stay at `ee90a5e`.
+
+**What it contains**
+
+- **Landing hero:** an animated schematic of one payment, drawn in SVG. A valid 0.01 SOL request passes the policy gate, waits as a pending proposal, is signed by the owner, is checked again and is paid from the vault. A prompt-injected 5 SOL request fails the limit check and is refused on-chain. The check order follows the program: `propose_payment` checks agent, recipient, limit, balance and state; `approve_and_execute_payment` checks the owner's signature, state, nonce, agent, recipient, limit and balance. Visitors can switch runs, pause, and hover or tab through each part. Phones and tablets get a vertical layout.
+- **Story:** five scenes, each with its own illustration: an agent holding a key drains a wallet; a program boundary encloses the vault; the owner's signature opens the gate (with the 64 bytes of the real owner approval `3MG4XChs...SzATV9oM`); two check pipelines read the same policy; one request clears and one is refused (both real Devnet transactions). Pinned scroll storytelling on large screens, stacked elsewhere, no scroll hijacking.
+- **Evidence:** eight real Devnet transactions whose outcomes are read live from Solana when the section scrolls into view.
+- **Console:** restyled in the same visual language. No change to wallet, transaction, Gemini, API or state logic.
+- **Illustrations are labelled as illustrations.** The only signatures shown in them are real Devnet transactions.
+
+**Verified on November 8, 2026**
+
+| Check | Result |
+| :--- | :--- |
+| Typecheck and production build | Pass |
+| Local-validator end-to-end (test wallet, stubbed backend routes, not Devnet) | Pass. Approve visible without scrolling at 1920x1080 (bottom 728px) and 1366x768 (bottom 732px); the recipient received exactly 0.1 SOL; the over-limit request shows as blocked |
+| Read-only checks on the running app against real Devnet (watch-only wallet, cannot sign) | 19 of 19 pass; no signing request made |
+| Evidence ledger read live from Devnet | 8 of 8 match their expected outcomes |
+| Wallet, transaction and state lines changed vs `ee90a5e` | 0 |
+| Program, backend, tests, IDL, `frontend/src/lib`, Vite config, `index.html` | Unchanged; deployed binary SHA-256 unchanged |
+| Horizontal overflow at 1920, 1440, 1366, 1280, 1024, 768 and 390 px wide | None |
+| Scroll performance at 1920x1080 | Median frame 16.7 ms, no long tasks, layout shift 0.006 |
+| Reduced motion | No autoplay or animation; the hero shows the finished run and the story stacks |
+| Bundle | JS 895.10 kB (gzip 268.13 kB), CSS 50.61 kB (gzip 10.34 kB) |
+
+**Known presentation limitations**
+
+- With reduced motion, web fonts swapping in cause a 0.031 layout shift on load (within the "good" range). Preloading fonts would need an `index.html` change.
+- Annotation labels inside the story illustrations render at about 9-10 px on a 390 px phone.
+- The wallet adapter's stylesheet requests fonts from `fonts.googleapis.com`.
 
 ## 4. Remaining (needs the owner)
 
