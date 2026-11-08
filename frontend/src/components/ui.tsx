@@ -25,7 +25,7 @@ export function Panel({
       {title && (
         <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-line px-5 py-3.5">
           <div className="min-w-0">
-            {eyebrow && <p className="label-mono mb-0.5 text-faint">{eyebrow}</p>}
+            {eyebrow && <p className="label-sm mb-0.5 text-faint">{eyebrow}</p>}
             <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
           </div>
           {aside}
@@ -39,11 +39,11 @@ export function Panel({
 /** Marks where a check really happens, so nothing off-chain passes as enforcement. */
 export function EnforcementTag({ where }: { where: "on-chain" | "off-chain" }) {
   return where === "on-chain" ? (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-guard/25 bg-guard-dim px-1.5 py-0.5 font-mono text-[11px] font-medium text-guard">
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-guard/25 bg-guard-dim px-1.5 py-0.5 text-[11px] font-medium text-guard">
       <ShieldCheck size={12} aria-hidden /> Enforced on-chain
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-line-strong px-1.5 py-0.5 font-mono text-[11px] font-medium text-muted">
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-line-strong px-1.5 py-0.5 text-[11px] font-medium text-muted">
       <Waypoints size={12} aria-hidden /> Off-chain check
     </span>
   );
@@ -80,7 +80,7 @@ export function Field({
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string }) {
   return (
     <label className="block">
-      <span className="label-mono mb-1.5 block text-faint">{label}</span>
+      <span className="label-sm mb-1.5 block text-faint">{label}</span>
       <input
         {...input}
         className="h-10 w-full rounded-lg border border-line bg-ink px-3 font-mono text-[13px] text-fg outline-none transition-colors placeholder:text-faint/70 hover:border-line-strong focus:border-guard/70 focus:bg-[#090c0e] read-only:text-muted"
@@ -162,7 +162,7 @@ export function TxNotice({ result }: { result: TxResult | null }) {
 /** Network indicator. The app only ever talks to Solana Devnet. */
 export function NetworkPill() {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-sys/25 bg-sys-dim px-2 py-1 font-mono text-[11px] font-medium text-sys">
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-sys/25 bg-sys-dim px-2 py-1 text-[11px] font-medium text-sys">
       <span className="live-dot h-1.5 w-1.5 rounded-full bg-sys" aria-hidden />
       Solana Devnet
     </span>

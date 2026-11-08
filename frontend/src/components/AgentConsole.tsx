@@ -32,7 +32,6 @@ export function AgentConsole({ state, agent }: { state: VaultState; agent: Agent
   return (
     <Panel
       title="Ask the agent"
-      eyebrow="Natural-language request"
       aside={
         <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-sys/25 bg-sys-dim px-2 py-1 font-mono text-[11px] text-sys">
           <Sparkles size={12} aria-hidden /> {agent?.geminiModel ?? "AI offline"}
@@ -54,7 +53,7 @@ export function AgentConsole({ state, agent }: { state: VaultState; agent: Agent
             className="block w-full resize-none bg-transparent px-4 pt-3.5 text-[15px] leading-relaxed text-fg outline-none placeholder:text-faint/80"
           />
           <div className="flex items-center justify-between gap-3 px-4 pb-2.5 pt-1">
-            <span className="label-mono text-faint">Parsed by Gemini · proposed by the agent</span>
+            <span className="label-sm text-faint">Gemini drafts it, the agent proposes it</span>
             <span className="font-mono text-[11px] text-faint tabular-nums">{prompt.length}/500</span>
           </div>
         </div>
@@ -71,7 +70,7 @@ export function AgentConsole({ state, agent }: { state: VaultState; agent: Agent
                 aria-hidden
               />
               {example.text}
-              <span className="font-mono text-[10px] uppercase tracking-wide text-faint">{example.tone}</span>
+              <span className="text-[11px] text-faint">{example.tone}</span>
             </button>
           ))}
         </div>
@@ -165,15 +164,15 @@ function Outcome({ response }: { response: ProposeResponse }) {
         <div className="px-4 py-3.5">
           <p className="text-fg">{response.message}</p>
           <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 gap-y-2 text-xs">
-            <dt className="label-mono text-faint">Program error</dt>
+            <dt className="label-sm text-faint">Program error</dt>
             <dd className="break-words font-mono text-danger">
               {response.error} ({response.errorCode})
             </dd>
-            <dt className="label-mono text-faint">AI understood</dt>
+            <dt className="label-sm text-faint">AI understood</dt>
             <dd className="font-mono">
               {response.parsedIntent.amountSol} SOL to {shorten(response.parsedIntent.recipient)}
             </dd>
-            <dt className="label-mono text-faint">Funds moved</dt>
+            <dt className="label-sm text-faint">Funds moved</dt>
             <dd className="font-mono">None</dd>
           </dl>
           <div className="mt-3">

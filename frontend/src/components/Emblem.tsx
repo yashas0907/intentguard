@@ -27,7 +27,7 @@ export function Wordmark() {
   return (
     <span className="flex items-center gap-2.5">
       <Emblem />
-      <span className="font-display text-[17px] font-semibold tracking-tight">IntentGuard</span>
+      <span className="text-[16px] font-semibold tracking-tight">IntentGuard</span>
     </span>
   );
 }
