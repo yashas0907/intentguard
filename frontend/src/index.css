@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-ink: #090c0f;
+  --color-panel: #10151a;
+  --color-raised: #161d23;
+  --color-line: #232c34;
+  --color-line-strong: #33404a;
+  --color-fg: #eaf0f3;
+  --color-muted: #94a3ae;
+  --color-faint: #66747f;
+  --color-guard: #35e0a1;
+  --color-guard-dim: #0f3a2b;
+  --color-warn: #f5b74f;
+  --color-warn-dim: #3d2d10;
+  --color-danger: #ff6b6b;
+  --color-danger-dim: #421b1e;
+}
+
+html,
+body {
+  background: var(--color-ink);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-image: radial-gradient(900px 420px at 50% -120px, rgb(53 224 161 / 0.07), transparent);
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(245 183 79 / 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgb(245 183 79 / 0);
+  }
+}
+
+.rise {
+  animation: rise 0.28s ease-out both;
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .pulse-ring {
+    animation: none;
+  }
+}
+
+/* Wallet adapter button, restyled to match the dashboard. */
+.wallet-adapter-button.wallet-adapter-button-trigger {
+  background: var(--color-raised);
+  border: 1px solid var(--color-line-strong);
+  border-radius: 8px;
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  height: 38px;
+  padding: 0 14px;
+}
+
+.wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
+  background: var(--color-line);
+}
+
+.wallet-adapter-button-trigger .wallet-adapter-button-start-icon,
+.wallet-adapter-button-trigger .wallet-adapter-button-start-icon img {
+  height: 18px;
+  width: 18px;
+}

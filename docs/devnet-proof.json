@@ -1,0 +1,108 @@
+{
+  "network": "devnet",
+  "programId": "HUcVUeiiuJhTmzDzJDEgJ7tkejGmmKFTapaXvLVvkjcE",
+  "deploySignature": "5cmrscNwBJt1bYuEUmLj1QVEds15nZyX6pcHx4FRPvg14xz4BSsuvkvrkzRGVHTsydERuf3feMkPcCiBmbUaJZLU",
+  "binarySha256": "ba3170f3ffe018f690fa092a3fea6bb08717ce26fedddc3015703ff2ae81a312",
+  "vault": "6Kv4AJtf1Tb5YpfbxFLE1f178hB6ykVn39juZQTJMSGk",
+  "recipient": "AysYADsexZg9kydavXDbccTspYXmFw6zhwKta8pxDREy",
+  "completedAt": "2026-11-08T04:51:21.372Z",
+  "note": "B1-B7 ran on the first pass and were verified from their on-chain records. B8-B11 ran in this pass.",
+  "balances": {
+    "recipientBefore": 1,
+    "recipientAfter": 1.01,
+    "vaultBefore": 0.10122428,
+    "vaultAfter": 0.09122428,
+    "deployerAfter": 0.75791312,
+    "deployerCumulativeNetSpend": 1.24208688
+  },
+  "rows": [
+    {
+      "step": "B1 Owner creates the vault",
+      "expected": "success",
+      "actual": "success",
+      "passed": true,
+      "signature": "5Zj64dGYH4ZAmst9mntWGHhRAfGvn62v7Lq9iTvGDow5dwkETJ6XkxnnE6ajTjEkBWKch7VZXigAYVuMGmJZB9dH",
+      "explorerUrl": "https://explorer.solana.com/tx/5Zj64dGYH4ZAmst9mntWGHhRAfGvn62v7Lq9iTvGDow5dwkETJ6XkxnnE6ajTjEkBWKch7VZXigAYVuMGmJZB9dH?cluster=devnet"
+    },
+    {
+      "step": "B2 Owner deposits 0.1 SOL",
+      "expected": "success",
+      "actual": "success",
+      "passed": true,
+      "signature": "48pD4whGLHkWGAEQMtrdco2mATAqfnYRR8bx1nQFRLSV9cobU5zs3CLqrwf6RmuhsoLaYdFr7hM8QCN5ty5qtyvj",
+      "explorerUrl": "https://explorer.solana.com/tx/48pD4whGLHkWGAEQMtrdco2mATAqfnYRR8bx1nQFRLSV9cobU5zs3CLqrwf6RmuhsoLaYdFr7hM8QCN5ty5qtyvj?cluster=devnet"
+    },
+    {
+      "step": "B3 Owner funds the agent with 0.02 SOL for fees",
+      "expected": "success",
+      "actual": "success",
+      "passed": true,
+      "signature": "HTWdKS4KutLCgyi3YGxJrRoVFxjxNWQxrMckgEkpML6MBQsBwUKXMq2C2gGcWvhRcdz4HsXVfKuh8tVNfQqWRD1",
+      "explorerUrl": "https://explorer.solana.com/tx/HTWdKS4KutLCgyi3YGxJrRoVFxjxNWQxrMckgEkpML6MBQsBwUKXMq2C2gGcWvhRcdz4HsXVfKuh8tVNfQqWRD1?cluster=devnet"
+    },
+    {
+      "step": "B4 Owner funds a rogue key with 0.005 SOL for fees",
+      "expected": "success",
+      "actual": "success",
+      "passed": true,
+      "signature": "25Bp4mwyJaDU6UzaKxUCTYR8EWja9HzdQhsUPCpH6KrCqju1TmxhNUZvZM1gvsMQKV8qr6B9RG5wPzgVivfFa6Sd",
+      "explorerUrl": "https://explorer.solana.com/tx/25Bp4mwyJaDU6UzaKxUCTYR8EWja9HzdQhsUPCpH6KrCqju1TmxhNUZvZM1gvsMQKV8qr6B9RG5wPzgVivfFa6Sd?cluster=devnet"
+    },
+    {
+      "step": "B5 Over-limit proposal (0.5 SOL against a 0.05 SOL limit)",
+      "expected": "AmountExceedsPolicyLimit",
+      "actual": "amountExceedsPolicyLimit",
+      "passed": true,
+      "signature": "639HTcmyJBCsKxCT4NDXutK7RKvwe1ZUyCwkxBWQWEyLjjAQZ7pL657UMdmCVoWwzMuXZjuJJyYjiLPdeSPgUZV8",
+      "explorerUrl": "https://explorer.solana.com/tx/639HTcmyJBCsKxCT4NDXutK7RKvwe1ZUyCwkxBWQWEyLjjAQZ7pL657UMdmCVoWwzMuXZjuJJyYjiLPdeSPgUZV8?cluster=devnet"
+    },
+    {
+      "step": "B6 Proposal to an unapproved recipient",
+      "expected": "UnapprovedRecipient",
+      "actual": "unapprovedRecipient",
+      "passed": true,
+      "signature": "2pieMUC5EfDzHN9SWHkUtBQcCXk83MzweD8Aky26X7WALzxXMLRbYvAbCHiCpJr4NXhhfWVSCmyHVWcdNnCSLzJ9",
+      "explorerUrl": "https://explorer.solana.com/tx/2pieMUC5EfDzHN9SWHkUtBQcCXk83MzweD8Aky26X7WALzxXMLRbYvAbCHiCpJr4NXhhfWVSCmyHVWcdNnCSLzJ9?cluster=devnet"
+    },
+    {
+      "step": "B7 Proposal signed by an unauthorized agent",
+      "expected": "UnauthorizedAgent",
+      "actual": "unauthorizedAgent",
+      "passed": true,
+      "signature": "4jpANJ2VR6rHxQjTB8PuwmuKCkkUXErCrhTF9sNEyDMjUvMqWE8QjwhSRE7167dPK94iCp5KvUtyWrmahPSnuCww",
+      "explorerUrl": "https://explorer.solana.com/tx/4jpANJ2VR6rHxQjTB8PuwmuKCkkUXErCrhTF9sNEyDMjUvMqWE8QjwhSRE7167dPK94iCp5KvUtyWrmahPSnuCww?cluster=devnet"
+    },
+    {
+      "step": "B8 Authorized agent proposes 0.01 SOL",
+      "expected": "success",
+      "actual": "success",
+      "passed": true,
+      "signature": "1d23dwLA6sB7sc4YfpFNdcrWMRn5U2fqH3kyguJRFUcnFSfG4ggXFJM6tpexXddxfKBhdAGVfhS85x3Ms15WcuA",
+      "explorerUrl": "https://explorer.solana.com/tx/1d23dwLA6sB7sc4YfpFNdcrWMRn5U2fqH3kyguJRFUcnFSfG4ggXFJM6tpexXddxfKBhdAGVfhS85x3Ms15WcuA?cluster=devnet"
+    },
+    {
+      "step": "B9 Agent tries to execute its own proposal",
+      "expected": "UnauthorizedOwner",
+      "actual": "UnauthorizedOwner",
+      "passed": true,
+      "signature": "AU1nWtL8NjfDEavw5bZXG4EZeVSxhkZYGnjKaoW6gKz9UguzQGW9vYrMAa3zNB9oZrv6GV1wiJW49UAT56SFbFt",
+      "explorerUrl": "https://explorer.solana.com/tx/AU1nWtL8NjfDEavw5bZXG4EZeVSxhkZYGnjKaoW6gKz9UguzQGW9vYrMAa3zNB9oZrv6GV1wiJW49UAT56SFbFt?cluster=devnet"
+    },
+    {
+      "step": "B10 Owner approves and executes",
+      "expected": "success",
+      "actual": "success",
+      "passed": true,
+      "signature": "rh5SQhmEM78nmxmAgFJCpcbKnpBenGXi4ozgXUiuKDYLYLa1pmhrQkv7XzgrWS88DCrFxTexNnSj6ev8ikgvuVC",
+      "explorerUrl": "https://explorer.solana.com/tx/rh5SQhmEM78nmxmAgFJCpcbKnpBenGXi4ozgXUiuKDYLYLa1pmhrQkv7XzgrWS88DCrFxTexNnSj6ev8ikgvuVC?cluster=devnet"
+    },
+    {
+      "step": "B11 Replay: execute the same proposal again",
+      "expected": "ProposalNotPending",
+      "actual": "ProposalNotPending",
+      "passed": true,
+      "signature": "5in2qaF8URn3FNx7Lx2QUUFJKEy5Y7FmvB7BiuoC89qHzRMPvGEmgXaPTS3E9aeGkD9Wp8iS2Kx7zafDB3qb6hJY",
+      "explorerUrl": "https://explorer.solana.com/tx/5in2qaF8URn3FNx7Lx2QUUFJKEy5Y7FmvB7BiuoC89qHzRMPvGEmgXaPTS3E9aeGkD9Wp8iS2Kx7zafDB3qb6hJY?cluster=devnet"
+    }
+  ]
+}
